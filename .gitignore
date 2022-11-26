@@ -1,2 +1,3 @@
 project/*.class
 project/javacard
+scripts/set_environment_variables.sh

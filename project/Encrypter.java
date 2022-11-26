@@ -18,16 +18,19 @@ public class Encrypter extends Applet
 	private final byte WRONG_PIN = 0x00;
 	private final byte RIGHT_PIN = 0x01;
 
+	private final byte NOT_UNLOCKED = 0x10;
+	
+
 	private final static byte PIN_CODE = 0x01;
 
 	/** INSTANCE FIELDS AND METHODS */
 
-	private boolean is_card_unlocked;
+	private boolean card_unlocked;
 	
 	public Encrypter()
 	{
 		// The card status is locked while the user hasn't sent the right PIN code
-		this.is_card_unlocked = false;
+		this.card_unlocked = false;
 	}
 
 	public static void install(byte[] buffer, short offset, byte length) 
@@ -60,8 +63,7 @@ public class Encrypter extends Applet
 			// A message code of 0x01 means the user submits a PIN code
 			case OP_PIN_CODE:
 
-				// we then have to check that the card is in the locked state, otherwise sending this operation code has no sense
-				if (!this.is_card_unlocked)
+				if (! this.card_unlocked)
 				{
 					// we need to compare the PIN code sent by the user to our hard-coded PIN code
 					// old comparison
@@ -71,7 +73,7 @@ public class Encrypter extends Applet
 					if (buffer[ISO7816.OFFSET_CDATA] == PIN_CODE)
 					{
 						buffer[0] = RIGHT_PIN;
-						this.is_card_unlocked = true;
+						this.card_unlocked = true;
 					}
 
 					// else we send back a 0x02 code
@@ -89,7 +91,16 @@ public class Encrypter extends Applet
 				{
 					ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
 				}
-			
+				break;
+
+			case OP_ENCRYPT:
+
+				if(! this.card_unlocked)
+				{
+					buffer[0] = NOT_UNLOCKED;
+				}
+
+				apdu.setOutgoingAndSend((short) 0, (short) 1);
 				break;
 
 			default:
