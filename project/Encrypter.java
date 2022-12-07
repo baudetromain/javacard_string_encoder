@@ -5,6 +5,7 @@ import javacard.framework.ISO7816;
 import javacard.framework.ISOException;
 import javacard.framework.APDU;
 import javacard.framework.Util;
+import javacard.framework.OwnerPIN;
 
 public class Encrypter extends Applet
 {
@@ -26,11 +27,14 @@ public class Encrypter extends Applet
 	/** INSTANCE FIELDS AND METHODS */
 
 	private boolean card_unlocked;
+	private OwnerPIN pin;
 	
 	public Encrypter()
 	{
 		// The card status is locked while the user hasn't sent the right PIN code
 		this.card_unlocked = false;
+		this.pin = new OwnerPIN((byte) 5, (byte) 1);
+		this.pin.update(new byte[]{0x37}, (short) 0, (byte) 1);
 	}
 
 	public static void install(byte[] buffer, short offset, byte length) 
@@ -65,25 +69,23 @@ public class Encrypter extends Applet
 
 				if (! this.card_unlocked)
 				{
+					short dataLength = apdu.setIncomingAndReceive();
 					// we need to compare the PIN code sent by the user to our hard-coded PIN code
 					// old comparison
 					//byte comparison = Util.arrayCompare(PIN_CODE, (byte) 0, buffer, ISO7816.OFFSET_CDATA, (short) 4);
 
 					// if the user-provided PIN code is right, we send back a 0x01 code and set the card to unlocked state
-					if (buffer[ISO7816.OFFSET_CDATA] == PIN_CODE)
+					if (this.pin.check(buffer, (short) ISO7816.OFFSET_CDATA, (byte) 1))
 					{
-						buffer[0] = RIGHT_PIN;
 						this.card_unlocked = true;
+						return;
 					}
 
 					// else we send back a 0x02 code
 					else
 					{
-						buffer[0] = WRONG_PIN;
+						ISOException.throwIt(ISO7816.SW_WRONG_DATA);
 					}
-
-					// we then send the response
-					apdu.setOutgoingAndSend((short) 0, (short) 1);
 				}
 
 				// if the card was already unlocked, sending the 0x01 operation code has no sense, so we treat this like an error
@@ -95,13 +97,14 @@ public class Encrypter extends Applet
 
 			case OP_ENCRYPT:
 
+				short dataLength = apdu.setIncomingAndReceive();
+
 				if(! this.card_unlocked)
 				{
-					buffer[0] = NOT_UNLOCKED;
+					ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
 				}
-
-				apdu.setOutgoingAndSend((short) 0, (short) 1);
-				break;
+				
+				return;
 
 			default:
 				// good practice: If you don't know the INStruction, say so:
