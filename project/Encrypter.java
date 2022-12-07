@@ -84,7 +84,7 @@ public class Encrypter extends Applet
 					// else we send back a 0x02 code
 					else
 					{
-						ISOException.throwIt(ISO7816.SW_WRONG_DATA);
+						ISOException.throwIt(ISO7816.SW_FILE_INVALID);
 					}
 				}
 

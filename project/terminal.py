@@ -3,9 +3,12 @@ from smartcard.System import readers
 from smartcard.util import toHexString
 
 def verify_PIN(pin, card):
-    SELECT = [0x01, 0x00, 0x00, 0x00, 0x02]
-    DATA = [0x00, 0x01]
-    response, sw1, sw2 = card.transmit( SELECT + DATA )
+    SELECT = [0x00, 0x00, 0x00, 0x00, 0x01]
+    DATA = [ord(pin)]
+    DATA = [0x37]
+    print(DATA)
+    print("Ask pin validity: ", SELECT + DATA)
+    response, sw1, sw2 = card.transmit([0x00, 0x00, 0x00, 0x00, 0x01, 0x37])
     print(response)
     print(sw1)
     print(sw2)
@@ -18,7 +21,8 @@ def encrypt_string(string, card):
 def main():
 
     card = readers()[0].createConnection()
-    card.connect()
+    cardconnected = card.connect()
+    print("You are connected to a card : ", cardconnected)
 
     right_PIN = False
     while not right_PIN:
