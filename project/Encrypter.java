@@ -7,6 +7,8 @@ import javacard.framework.APDU;
 import javacard.framework.Util;
 import javacard.framework.PIN;
 import javacard.framework.OwnerPIN;
+import javacard.security.KeyPair;
+import javacard.frameworkx.crypto.Cipher;
 
 public class Encrypter extends Applet
 {
@@ -14,25 +16,30 @@ public class Encrypter extends Applet
 	/** FINAL FIELDS */
 
 	private final byte CLA_APPLET = 0x25;
+
 	private final byte OP_PIN_CODE = 0x00;
 	private final byte OP_ENCRYPT = 0x01;
+	private final byte OP_GET_PUB_KEY = 0x02;
 
 	private final byte WRONG_PIN = 0x00;
 	private final byte RIGHT_PIN = 0x01;
 
 	private final byte NOT_UNLOCKED = 0x10;
 
-	private final static byte PIN_CODE = 0x01;
+	private final byte[] PIN_CODE= new byte[]{0x30, 0x37, 0x32, 0x37};
+
 
 	/** INSTANCE FIELDS AND METHODS */
 
 	private PIN pin;
+	private final KeyPair keyPair; 
 	
 	public Encrypter()
 	{
-		// The card status is locked while the user hasn't sent the right PIN code
 		this.pin = new OwnerPIN((byte) 5, (byte) 4);
-		((OwnerPIN) this.pin).update(new byte[]{0x30, 0x37, 0x32, 0x37}, (short) 0, (byte) 4);
+		((OwnerPIN) this.pin).update(PIN_CODE, (short) 0, (byte) 4);
+
+		this.keyPair = new KeyPair(KeyPair.ALG_RSA, (short) 512);
 	}
 
 	public static void install(byte[] buffer, short offset, byte length) 
@@ -89,7 +96,7 @@ public class Encrypter extends Applet
 					// if the card was already unlocked, sending the 0x01 operation code has no sense, so we treat this like an error
 					else
 					{
-						ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
+						ISOException.throwIt(ISO7816.SW_COMMAND_NOT_ALLOWED);
 					}
 					break;
 
@@ -99,7 +106,7 @@ public class Encrypter extends Applet
 
 					if(!((OwnerPIN) this.pin).isValidated())
 					{
-						ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
+						ISOException.throwIt(ISO7816.SW_COMMAND_NOT_ALLOWED);
 					}
 					
 					return;
