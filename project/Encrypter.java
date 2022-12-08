@@ -8,7 +8,6 @@ import javacard.framework.Util;
 import javacard.framework.PIN;
 import javacard.framework.OwnerPIN;
 import javacard.security.KeyPair;
-import javacard.frameworkx.crypto.Cipher;
 
 public class Encrypter extends Applet
 {
@@ -26,7 +25,9 @@ public class Encrypter extends Applet
 
 	private final byte NOT_UNLOCKED = 0x10;
 
-	private final byte[] PIN_CODE= new byte[]{0x30, 0x37, 0x32, 0x37};
+	private final byte[] PIN_CODE = new byte[]{0x30, 0x37, 0x32, 0x37};
+
+	private final byte[] DUMMY = new byte[]{0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39};
 
 
 	/** INSTANCE FIELDS AND METHODS */
@@ -80,7 +81,7 @@ public class Encrypter extends Applet
 						// old comparison
 						//byte comparison = Util.arrayCompare(PIN_CODE, (byte) 0, buffer, ISO7816.OFFSET_CDATA, (short) 4);
 
-						// if the user-provided PIN code is right, we send back a 0x01 code and set the card to unlocked state
+						// if the user-provided Papdu.setOutgoingAndSend(ISO7816.OFFSET_CDATA, (byte) dataLength);ode is right, we send back a 0x01 code and set the card to unlocked state
 						if (this.pin.check(buffer, (short) ISO7816.OFFSET_CDATA, (byte) 4))
 						{
 							return;
@@ -102,11 +103,16 @@ public class Encrypter extends Applet
 
 				case OP_ENCRYPT:
 
-					short dataLength = apdu.setIncomingAndReceive();
-
 					if(!((OwnerPIN) this.pin).isValidated())
 					{
 						ISOException.throwIt(ISO7816.SW_COMMAND_NOT_ALLOWED);
+					}
+					else
+					{
+						short dataLength = apdu.setIncomingAndReceive();
+						short inputLength = buffer[ISO7816.OFFSET_LC];
+                		Util.arrayCopy(DUMMY, (short) 0, buffer, ISO7816.OFFSET_CDATA, (short) DUMMY.length);
+						apdu.setOutgoingAndSend(ISO7816.OFFSET_CDATA, (short) DUMMY.length);
 					}
 					
 					return;
