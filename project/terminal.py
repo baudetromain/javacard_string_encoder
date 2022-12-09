@@ -3,20 +3,31 @@ from smartcard.System import readers
 from smartcard.util import toHexString
 
 def verify_PIN(pin, card):
-    SELECT = [0x00, 0x00, 0x00, 0x00, 0x01]
-    DATA = [ord(pin)]
-    DATA = [0x37]
-    print(DATA)
-    print("Ask pin validity: ", SELECT + DATA)
-    response, sw1, sw2 = card.transmit([0x00, 0x00, 0x00, 0x00, 0x01, 0x37])
-    print(response)
-    print(sw1)
-    print(sw2)
-    return True if random.randint(0, 10) == 0 else False
+    SELECT = [0x25, 0x00, 0x00, 0x00, 0x04]
+    if len(pin) != 4:
+        print("PIN incorrect length")
+        return False
+    DATA = list(map(ord, [char for char in pin]))
+    response, sw1, sw2 = card.transmit( SELECT + DATA )
+    print ("%x %x" % (sw1, sw2))
+    return True if (sw1, sw2) == (144,0) else False
 
+def init_test_PIN(card):
+    SELECT = [0x25, 0x00, 0x00, 0x00, 0x01]
+    DATA = [0x04]
+    response, sw1, sw2 = card.transmit( SELECT + DATA )
+    return True if (sw1, sw2) == (105,134) else False
 
 def encrypt_string(string, card):
-    return "hi"
+    SELECT = [0x25, 0x01, 0x00, 0x00, len(string)]
+    STRING = list(map(ord, [char for char in string]))
+    RETURN_BUFFER_LEN = [0x00]
+
+    print(string)
+
+    response, sw1, sw2 = card.transmit( SELECT + STRING + RETURN_BUFFER_LEN )
+
+    return "YEP CLOCK"
 
 def main():
 
@@ -24,7 +35,7 @@ def main():
     cardconnected = card.connect()
     print("You are connected to a card : ", cardconnected)
 
-    right_PIN = False
+    right_PIN = init_test_PIN(card)
     while not right_PIN:
         print("Please enter the 4-digit PIN code: ", end="")
         user_input = input()
