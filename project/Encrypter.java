@@ -33,7 +33,7 @@ public class Encrypter extends Applet
 
 	/** INSTANCE FIELDS AND METHODS */
 
-	private OwnerPIN pin;
+	private final OwnerPIN pin;
 	private final KeyPair keyPair;
 
 	public Encrypter()
@@ -78,7 +78,7 @@ public class Encrypter extends Applet
 				// A message code of 0x01 means the user submits a PIN code
 				case OP_PIN_CODE:
 
-					if (1)
+					if (!this.pin.isValidated())
                                         {
 					
 						byte dataLength = (byte) apdu.setIncomingAndReceive();

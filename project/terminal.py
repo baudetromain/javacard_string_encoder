@@ -8,7 +8,6 @@ def verify_PIN(pin, card):
         print("PIN incorrect length")
         return False
     DATA = list(bytes(pin, "utf-8"))
-    print (SELECT + DATA)
     response, sw1, sw2 = card.transmit( SELECT + DATA )
     print ("%x %x" % (sw1, sw2))
     return True if (sw1, sw2) == (144,0) else False
