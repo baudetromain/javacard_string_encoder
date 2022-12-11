@@ -34,20 +34,24 @@ def main():
 
     card = readers()[0].createConnection()
     card.connect()
-    print("You are connected to a card : ", card)
-
     card_code = [0x00, 0xA4, 0x04, 0x00, 0x08, 0xA0, 0x00, 0x00, 0x00, 0x62, 0x03, 0x01, 0x0C, 0x06, 0x01, 0x02]
     response, sw1, sw2 = card.transmit(card_code)
-    print ("%x %x" % (sw1, sw2))
 
     right_PIN = False
-    while not right_PIN:
+    count_PIN = 0
+    max_count_PIN = 3
+    while (not right_PIN) and (count_PIN < max_count_PIN):
         print("Please enter the 4-digit PIN code: ", end="")
         user_input = input()
+        count_PIN += 1
         right_PIN = verify_PIN(user_input, card)
         print("PIN code correct." if right_PIN else "Incorrect PIN code.")
 
-    while True:
+    if (max_count_PIN == count_PIN):
+        print("You exceed the number of tentative, Sorry.")
+        return
+
+    while right_PIN:
         print("Please enter a string to encode, or leave the line empty to exit the program.")
         user_input = input()
 

@@ -37,7 +37,7 @@ public class Encrypter extends Applet
 
 	public Encrypter()
 	{
-		this.pin = new OwnerPIN((byte) 5, (byte) 4);
+		this.pin = new OwnerPIN((byte) 3, (byte) 4);
 		this.pin.update(PIN_CODE, (short) 0, (byte) 4);
 
 		this.keyPair = new KeyPair(KeyPair.ALG_RSA, (short) 512);
