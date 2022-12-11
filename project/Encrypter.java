@@ -32,13 +32,13 @@ public class Encrypter extends Applet
 
 	/** INSTANCE FIELDS AND METHODS */
 
-	private PIN pin;
-	private final KeyPair keyPair; 
-	
+	private OwnerPIN pin;
+	private final KeyPair keyPair;
+
 	public Encrypter()
 	{
 		this.pin = new OwnerPIN((byte) 5, (byte) 4);
-		((OwnerPIN) this.pin).update(PIN_CODE, (short) 0, (byte) 4);
+		this.pin.update(PIN_CODE, (short) 0, (byte) 4);
 
 		this.keyPair = new KeyPair(KeyPair.ALG_RSA, (short) 512);
 	}
@@ -62,9 +62,9 @@ public class Encrypter extends Applet
 
 		if ((buffer[ISO7816.OFFSET_CLA] == 0) && (buffer[ISO7816.OFFSET_INS] == (byte) 0xA4)) 
 		{
-            // return if this is a SELECT FILE command
-            return;
-        }
+            	// return if this is a SELECT FILE command
+        	    return;
+	        }
 
 		if (buffer[ISO7816.OFFSET_CLA] == CLA_APPLET)
 		{
@@ -74,15 +74,16 @@ public class Encrypter extends Applet
 				// A message code of 0x01 means the user submits a PIN code
 				case OP_PIN_CODE:
 
-					if (!((OwnerPIN) this.pin).isValidated())
-					{
-						short dataLength = apdu.setIncomingAndReceive();
+					if (1)
+                                        {
+					
+						byte dataLength = (byte) apdu.setIncomingAndReceive();
 						// we need to compare the PIN code sent by the user to our hard-coded PIN code
 						// old comparison
 						//byte comparison = Util.arrayCompare(PIN_CODE, (byte) 0, buffer, ISO7816.OFFSET_CDATA, (short) 4);
 
 						// if the user-provided Papdu.setOutgoingAndSend(ISO7816.OFFSET_CDATA, (byte) dataLength);ode is right, we send back a 0x01 code and set the card to unlocked state
-						if (this.pin.check(buffer, (short) ISO7816.OFFSET_CDATA, (byte) 4))
+						if (this.pin.check(buffer, ISO7816.OFFSET_CDATA, dataLength))
 						{
 							return;
 						}
@@ -90,7 +91,7 @@ public class Encrypter extends Applet
 						// else we send back a 0x02 code
 						else
 						{
-							ISOException.throwIt(ISO7816.SW_WRONG_DATA);
+							ISOException.throwIt(ISO7816.SW_CONDITIONS_NOT_SATISFIED);
 						}
 					}
 
@@ -99,7 +100,7 @@ public class Encrypter extends Applet
 					{
 						ISOException.throwIt(ISO7816.SW_COMMAND_NOT_ALLOWED);
 					}
-					break;
+					return;
 
 				case OP_ENCRYPT:
 
@@ -114,7 +115,6 @@ public class Encrypter extends Applet
                 		Util.arrayCopy(DUMMY, (short) 0, buffer, ISO7816.OFFSET_CDATA, (short) DUMMY.length);
 						apdu.setOutgoingAndSend(ISO7816.OFFSET_CDATA, (short) DUMMY.length);
 					}
-					
 					return;
 
 				default:

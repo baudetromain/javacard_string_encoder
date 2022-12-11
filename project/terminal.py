@@ -7,7 +7,8 @@ def verify_PIN(pin, card):
     if len(pin) != 4:
         print("PIN incorrect length")
         return False
-    DATA = list(map(ord, [char for char in pin]))
+    DATA = list(bytes(pin, "utf-8"))
+    print (SELECT + DATA)
     response, sw1, sw2 = card.transmit( SELECT + DATA )
     print ("%x %x" % (sw1, sw2))
     return True if (sw1, sw2) == (144,0) else False
@@ -32,10 +33,14 @@ def encrypt_string(string, card):
 def main():
 
     card = readers()[0].createConnection()
-    cardconnected = card.connect()
-    print("You are connected to a card : ", cardconnected)
+    card.connect()
+    print("You are connected to a card : ", card)
 
-    right_PIN = init_test_PIN(card)
+    card_code = [0x00, 0xA4, 0x04, 0x00, 0x08, 0xA0, 0x00, 0x00, 0x00, 0x62, 0x03, 0x01, 0x0C, 0x06, 0x01, 0x02]
+    response, sw1, sw2 = card.transmit(card_code)
+    print ("%x %x" % (sw1, sw2))
+
+    right_PIN = False
     while not right_PIN:
         print("Please enter the 4-digit PIN code: ", end="")
         user_input = input()
