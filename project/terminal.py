@@ -49,7 +49,7 @@ def main():
         right_PIN = verify_PIN(user_input, card)
         print("PIN code correct." if right_PIN else "Incorrect PIN code.")
 
-    if (max_count_PIN == count_PIN):
+    if (max_count_PIN == count_PIN) and (not right_PIN):
         print("You exceed the number of tentative, Sorry.")
         return
 
