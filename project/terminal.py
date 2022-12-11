@@ -19,15 +19,12 @@ def init_test_PIN(card):
     return True if (sw1, sw2) == (105,134) else False
 
 def encrypt_string(string, card):
-    SELECT = [0x25, 0x01, 0x00, 0x00, len(string)]
-    STRING = list(map(ord, [char for char in string]))
-    RETURN_BUFFER_LEN = [0x00]
+    SELECT = [0x25, 0x02, 0x00, 0x00, len(string)]
+    STRING = list(bytes(string, "utf-8"))
+    print (string, STRING, SELECT)
+    response, sw1, sw2 = card.transmit(SELECT + STRING)
+    return response if (sw1, sw2) == (144,0) else None
 
-    print(string)
-
-    response, sw1, sw2 = card.transmit( SELECT + STRING + RETURN_BUFFER_LEN )
-
-    return "YEP CLOCK"
 
 def main():
 
@@ -55,11 +52,11 @@ def main():
     while right_PIN:
         print("Please enter a string to encode, or leave the line empty to exit the program.")
         user_input = input()
-
         if user_input == "":
             break
-
-        print(f"The encryption of \"{user_input}\" is \"{encrypt_string(user_input)}\".")
+        else:
+            user_encrypt = encrypt_string(user_input, card)
+            print (user_input, user_encrypt)
 
     print("Goodbye.")
     exit(0)

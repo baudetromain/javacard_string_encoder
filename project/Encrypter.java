@@ -108,13 +108,13 @@ public class Encrypter extends Applet
 
 				case OP_ENCRYPT:
 
-					if(!((OwnerPIN) this.pin).isValidated())
+					if(!this.pin.isValidated())
 					{
 						ISOException.throwIt(ISO7816.SW_COMMAND_NOT_ALLOWED);
 					}
 					else
 					{
-						short dataLength = apdu.setIncomingAndReceive();
+                                                byte dataLength = (byte) apdu.setIncomingAndReceive();
 						short inputLength = buffer[ISO7816.OFFSET_LC];
                 		Util.arrayCopy(DUMMY, (short) 0, buffer, ISO7816.OFFSET_CDATA, (short) DUMMY.length);
 						apdu.setOutgoingAndSend(ISO7816.OFFSET_CDATA, (short) DUMMY.length);
