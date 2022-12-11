@@ -16,9 +16,10 @@ public class Encrypter extends Applet
 
 	private final byte CLA_APPLET = 0x25;
 
-	private final byte OP_PIN_CODE = 0x00;
-	private final byte OP_ENCRYPT = 0x01;
-	private final byte OP_GET_PUB_KEY = 0x02;
+        private final byte OP_RESET = 0x00;
+	private final byte OP_PIN_CODE = 0x01;
+	private final byte OP_ENCRYPT = 0x02;
+	private final byte OP_GET_PUB_KEY = 0x03;
 
 	private final byte WRONG_PIN = 0x00;
 	private final byte RIGHT_PIN = 0x01;
@@ -71,6 +72,9 @@ public class Encrypter extends Applet
 			// We decide what to do depending on the instruction we receive
 			switch (buffer[ISO7816.OFFSET_INS])
 			{
+                                case OP_RESET:
+                                        reset();
+
 				// A message code of 0x01 means the user submits a PIN code
 				case OP_PIN_CODE:
 

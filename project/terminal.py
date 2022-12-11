@@ -14,7 +14,7 @@ def verify_PIN(pin, card):
     return True if (sw1, sw2) == (144,0) else False
 
 def init_test_PIN(card):
-    SELECT = [0x25, 0x00, 0x00, 0x00, 0x01]
+    SELECT = [0x25, 0x01, 0x00, 0x00, 0x01]
     DATA = [0x04]
     response, sw1, sw2 = card.transmit( SELECT + DATA )
     return True if (sw1, sw2) == (105,134) else False
@@ -34,6 +34,8 @@ def main():
 
     card = readers()[0].createConnection()
     card.connect()
+    card_reset = [0x25, 0x00, 0x00, 0x00, 0x01, 0x01]
+    response, sw1, sw2 = card.transmit(card_reset)
     card_code = [0x00, 0xA4, 0x04, 0x00, 0x08, 0xA0, 0x00, 0x00, 0x00, 0x62, 0x03, 0x01, 0x0C, 0x06, 0x01, 0x02]
     response, sw1, sw2 = card.transmit(card_code)
 
