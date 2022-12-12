@@ -7,7 +7,7 @@ import javacard.framework.APDU;
 import javacard.framework.Util;
 import javacard.framework.PIN;
 import javacard.framework.OwnerPIN;
-import javacard.security.KeyPair;
+import javacard.security.*;
 
 public class Encrypter extends Applet
 {
@@ -34,14 +34,14 @@ public class Encrypter extends Applet
 	/** INSTANCE FIELDS AND METHODS */
 
 	private final OwnerPIN pin;
-	private final KeyPair keyPair;
+	private KeyPair keyPair;
 
 	public Encrypter()
 	{
 		this.pin = new OwnerPIN((byte) 3, (byte) 4);
 		this.pin.update(PIN_CODE, (short) 0, (byte) 4);
 
-		this.keyPair = new KeyPair(KeyPair.ALG_RSA, (short) 512);
+		this.keyPair = new KeyPair(KeyPair.ALG_RSA_CRT, KeyBuilder.LENGTH_RSA_1024);
 	}
 
 	public static void install(byte[] buffer, short offset, byte length) 
@@ -73,7 +73,7 @@ public class Encrypter extends Applet
 			switch (buffer[ISO7816.OFFSET_INS])
 			{
                                 case OP_RESET:
-                                        reset();
+                                        return;
 
 				// A message code of 0x01 means the user submits a PIN code
 				case OP_PIN_CODE:
@@ -120,8 +120,17 @@ public class Encrypter extends Applet
 						apdu.setOutgoingAndSend(ISO7816.OFFSET_CDATA, (short) DUMMY.length);
 					}
 					return;
+                                
+                                case OP_GET_PUB_KEY:
 
-				default:
+					byte dataLength = (byte) apdu.setIncomingAndReceive();
+                                        RSAPublicKey pk = (RSAPublicKey) keyPair.getPublic();
+                                        short mod = pk.getModulus(buffer, ISO7816.OFFSET_CDATA);
+                                        apdu.setOutgoingAndSend(ISO7816.OFFSET_CDATA, mod);
+                                        return;
+
+
+                                default:
 					// good practice: If you don't know the INStruction, say so:
 					ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
 			}
