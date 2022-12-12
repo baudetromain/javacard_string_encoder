@@ -128,23 +128,37 @@ public class Encrypter extends Applet
                                 
                                 case OP_GET_PUB_KEY_MOD:
 
-					byte dataLengthmod = (byte) apdu.setIncomingAndReceive();
-                                        short mod = pk.getModulus(buffer, ISO7816.OFFSET_CDATA);
-                                        apdu.setOutgoingAndSend(ISO7816.OFFSET_CDATA, mod);
+                                        if(!this.pin.isValidated())
+                                        {
+                                                ISOException.throwIt(ISO7816.SW_COMMAND_NOT_ALLOWED);
+                                        }
+                                        else
+                                        {
+						byte dataLengthmod = (byte) apdu.setIncomingAndReceive();
+                                        	short mod = pk.getModulus(buffer, ISO7816.OFFSET_CDATA);
+                                        	apdu.setOutgoingAndSend(ISO7816.OFFSET_CDATA, mod);
+                                        }
                                         return;
 
                                 case OP_GET_PUB_KEY_EXP:
 
-                                        byte dataLengthexp = (byte) apdu.setIncomingAndReceive();
-                                        short exp = pk.getExponent(buffer, ISO7816.OFFSET_CDATA);
-                                        apdu.setOutgoingAndSend(ISO7816.OFFSET_CDATA, exp);
+                                        if(!this.pin.isValidated())
+                                        {
+                                                ISOException.throwIt(ISO7816.SW_COMMAND_NOT_ALLOWED);
+                                        }
+                                        else
+                                        {
+                                                byte dataLengthmod = (byte) apdu.setIncomingAndReceive();
+                                                short exp = pk.getModulus(buffer, ISO7816.OFFSET_CDATA);
+                                                apdu.setOutgoingAndSend(ISO7816.OFFSET_CDATA, exp);
+                                        }
                                         return;
 
-
                                 default:
-					// good practice: If you don't know the INStruction, say so:
-					ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
-			}
-		}
+					// good practice: If you don't know the INStruction, say so
+                                        ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
+
+                       }
+                 }
 	}
 }
