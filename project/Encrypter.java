@@ -19,7 +19,9 @@ public class Encrypter extends Applet
         private final byte OP_RESET = 0x00;
 	private final byte OP_PIN_CODE = 0x01;
 	private final byte OP_ENCRYPT = 0x02;
-	private final byte OP_GET_PUB_KEY = 0x03;
+	private final byte OP_GET_PUB_KEY_MOD = 0x03;
+        private final byte OP_GET_PUB_KEY_EXP = 0x04;
+
 
 	private final byte WRONG_PIN = 0x00;
 	private final byte RIGHT_PIN = 0x01;
@@ -35,14 +37,17 @@ public class Encrypter extends Applet
 
 	private final OwnerPIN pin;
 	private KeyPair keyPair;
+        public RSAPublicKey pk;
 
 	public Encrypter()
 	{
 		this.pin = new OwnerPIN((byte) 3, (byte) 4);
 		this.pin.update(PIN_CODE, (short) 0, (byte) 4);
 
-		this.keyPair = new KeyPair(KeyPair.ALG_RSA_CRT, KeyBuilder.LENGTH_RSA_1024);
-	}
+		this.keyPair = new KeyPair(KeyPair.ALG_RSA, KeyBuilder.LENGTH_RSA_1024);
+                keyPair.genKeyPair();
+	        this.pk = (RSAPublicKey) keyPair.getPublic();
+        }
 
 	public static void install(byte[] buffer, short offset, byte length) 
 	{
@@ -121,12 +126,18 @@ public class Encrypter extends Applet
 					}
 					return;
                                 
-                                case OP_GET_PUB_KEY:
+                                case OP_GET_PUB_KEY_MOD:
 
-					byte dataLength = (byte) apdu.setIncomingAndReceive();
-                                        RSAPublicKey pk = (RSAPublicKey) keyPair.getPublic();
+					byte dataLengthmod = (byte) apdu.setIncomingAndReceive();
                                         short mod = pk.getModulus(buffer, ISO7816.OFFSET_CDATA);
                                         apdu.setOutgoingAndSend(ISO7816.OFFSET_CDATA, mod);
+                                        return;
+
+                                case OP_GET_PUB_KEY_EXP:
+
+                                        byte dataLengthexp = (byte) apdu.setIncomingAndReceive();
+                                        short exp = pk.getExponent(buffer, ISO7816.OFFSET_CDATA);
+                                        apdu.setOutgoingAndSend(ISO7816.OFFSET_CDATA, exp);
                                         return;
 
 
