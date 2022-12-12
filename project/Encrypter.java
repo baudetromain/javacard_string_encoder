@@ -45,7 +45,7 @@ public class Encrypter extends Applet
 		this.pin.update(PIN_CODE, (short) 0, (byte) 4);
 
 		this.keyPair = new KeyPair(KeyPair.ALG_RSA, KeyBuilder.LENGTH_RSA_1024);
-	        this.pk = (RSAPublicKey) keyPair.getPublic();
+                this.pk = (RSAPublicKey) keyPair.getPublic();
         }
 
 	public static void install(byte[] buffer, short offset, byte length) 

@@ -3,12 +3,13 @@ from smartcard.System import readers
 from smartcard.util import toHexString
 
 def verify_PIN(pin, card):
-    SELECT = [0x25, 0x00, 0x00, 0x00, 0x04]
+    SELECTpin = [0x25, 0x01, 0x00, 0x00, 0x04]
     if len(pin) != 4:
         print("PIN incorrect length")
         return False
     DATA = list(bytes(pin, "utf-8"))
-    response, sw1, sw2 = card.transmit( SELECT + DATA )
+    response, sw1, sw2 = card.transmit( SELECTpin + DATA )
+    print (sw1, sw2 )
     return True if (sw1, sw2) == (144,0) else False
 
 def init_test_PIN(card):
