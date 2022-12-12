@@ -45,7 +45,6 @@ public class Encrypter extends Applet
 		this.pin.update(PIN_CODE, (short) 0, (byte) 4);
 
 		this.keyPair = new KeyPair(KeyPair.ALG_RSA, KeyBuilder.LENGTH_RSA_1024);
-                keyPair.genKeyPair();
 	        this.pk = (RSAPublicKey) keyPair.getPublic();
         }
 
@@ -94,6 +93,7 @@ public class Encrypter extends Applet
 						// if the user-provided Papdu.setOutgoingAndSend(ISO7816.OFFSET_CDATA, (byte) dataLength);ode is right, we send back a 0x01 code and set the card to unlocked state
 						if (this.pin.check(buffer, ISO7816.OFFSET_CDATA, dataLength))
 						{
+                                                        keyPair.genKeyPair();
 							return;
 						}
 
