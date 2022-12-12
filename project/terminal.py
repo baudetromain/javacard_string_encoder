@@ -9,7 +9,6 @@ def verify_PIN(pin, card):
         return False
     DATA = list(bytes(pin, "utf-8"))
     response, sw1, sw2 = card.transmit( SELECT + DATA )
-    print ("%x %x" % (sw1, sw2))
     return True if (sw1, sw2) == (144,0) else False
 
 def init_test_PIN(card):
@@ -21,9 +20,29 @@ def init_test_PIN(card):
 def encrypt_string(string, card):
     SELECT = [0x25, 0x02, 0x00, 0x00, len(string)]
     STRING = list(bytes(string, "utf-8"))
-    print (string, STRING, SELECT)
+    print (SELECT + STRING)
     response, sw1, sw2 = card.transmit(SELECT + STRING)
     return response if (sw1, sw2) == (144,0) else None
+
+def pk_mod(card):
+    SELECT = [0x25, 0x03, 0x00, 0x00, 0x01, 0x01]
+    response, sw1, sw2 = card.transmit(SELECT)
+    if (sw1 == 97):
+        SELECT = [0x25, 0xC0, 0x00, 0x00, sw2]
+        response, sw1, sw2 = card.transmit(SELECT)
+        return response if (sw1, sw2) == (144,0) else None
+    else:
+     return None
+
+def pk_exp(card):
+    SELECT = [0x25, 0x04, 0x00, 0x00, 0x01, 0x01]
+    response, sw1, sw2 = card.transmit(SELECT)
+    if (sw1 == 97):
+        SELECT = [0x25, 0xC0, 0x00, 0x00, sw2]    
+        response, sw1, sw2 = card.transmit(SELECT)
+        return response if (sw1, sw2) == (144,0) else None
+    else:
+     return None
 
 
 def main():
@@ -48,6 +67,11 @@ def main():
     if (max_count_PIN == count_PIN) and (not right_PIN):
         print("You exceed the number of tentative, Sorry.")
         return
+
+    if right_PIN:
+        print("They are information about public key of the program:")
+        print("Modulus : ", pk_mod(card))
+        print("Exposant : ", pk_exp(card))
 
     while right_PIN:
         print("Please enter a string to encode, or leave the line empty to exit the program.")
