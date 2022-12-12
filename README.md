@@ -74,6 +74,7 @@ If the end-user makes a mistakes, somme error message will appear.
 
 ### Architecture
 The main part of the Applet is a switch case, that looks for the instruction of the APDU.
+- 0x00, was for resest the card, but we didn't manage to do it properly
 - 0x01 , for the PIN instruction and so the key pair
 - 0x02 , for the encryption of some data
 - 0x03 , for informations about the modulus of the public key
