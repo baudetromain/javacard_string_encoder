@@ -71,3 +71,12 @@ To run the terminal-side goes in the root of the project and run python projet/t
 Instructions will appear.
 First end-user has to put a PIN code. Then he is able to see some informations avout the public key, then he can put some data to be encrypted.
 If the end-user makes a mistakes, somme error message will appear.
+
+### Architecture
+The main part of the Applet is a switch case, that looks for the instruction of the APDU.
+- 0x01 , for the PIN instruction and so the key pair
+- 0x02 , for the encryption of some data
+- 0x03 , for informations about the modulus of the public key
+- 0x04 , for insofrmations about the exponent of the public key
+
+The terminal-side is some functions. Functions send a different APDU to the card regarding what the function is used for.
